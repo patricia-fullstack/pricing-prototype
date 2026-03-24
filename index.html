@@ -1,0 +1,1396 @@
+P<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pricing Wizard Prototype — Holidu PMS</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+  :root {
+    --black: #2B2926;
+    --gray-800: #45423E;
+    --gray-700: #605C57;
+    --gray-600: #7A7570;
+    --gray-400: #AFAAA5;
+    --gray-300: #D1CCC7;
+    --gray-200: #EAE5E0;
+    --gray-100: #F1EEEB;
+    --gray-50: #F7F5F3;
+    --white: #FFFFFF;
+    --petrol: #00809D;
+    --petrol-dark: #024251;
+    --petrol-5: rgba(0, 128, 157, 0.05);
+    --petrol-hover: #006B82;
+    --blue-100: #DDF2F7;
+    --discovery: #5A50EB;
+    --discovery-10: rgba(90, 80, 235, 0.10);
+    --discovery-20: rgba(90, 80, 235, 0.20);
+    --success: #4CAF50;
+    --error: #F44336;
+    --demand-orange: #FFB74D;
+    --black-20: rgba(0, 0, 0, 0.2);
+    --black-16: rgba(0, 0, 0, 0.16);
+    --black-40: rgba(0, 0, 0, 0.40);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', -apple-system, system-ui, sans-serif; background: var(--white); color: var(--black); }
+
+  /* Layout */
+  .app { display: flex; flex-direction: column; min-height: 100vh; }
+
+  /* Top navbar — white bg per Figma */
+  .topbar { height: 64px; background: var(--white); border-bottom: 1px solid var(--black-20); display: flex; align-items: center; padding: 0 36px; position: sticky; top: 0; z-index: 100; }
+  .topbar-inner { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+  .topbar-logo { display: flex; align-items: center; gap: 0; }
+  .topbar-logo svg { height: 36px; width: auto; }
+  .topbar-user { display: flex; align-items: center; gap: 8px; padding: 12px; border-radius: 8px; cursor: pointer; }
+  .topbar-user:hover { background: var(--gray-50); }
+  .topbar-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--blue-100); display: flex; align-items: center; justify-content: center; color: var(--petrol-dark); font-size: 14px; font-weight: 600; letter-spacing: -0.084px; line-height: 20px; }
+  .topbar-username { color: var(--gray-700); font-size: 14px; font-weight: 600; letter-spacing: -0.084px; line-height: 20px; }
+  .topbar-chevron { color: var(--gray-700); font-size: 12px; }
+
+  .main { display: flex; flex: 1; }
+
+  /* Sidebar */
+  .sidebar { width: 272px; background: var(--white); border-right: 1px solid var(--gray-200); padding: 0; overflow-y: auto; position: sticky; top: 64px; height: calc(100vh - 64px); flex-shrink: 0; }
+  .sidebar-section { padding: 8px 0; }
+  .sidebar-section-title { font-size: 12px; font-weight: 600; color: var(--gray-600); padding: 8px 20px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .sidebar-item { display: flex; align-items: center; gap: 12px; padding: 10px 20px; font-size: 14px; color: var(--gray-800); cursor: pointer; text-decoration: none; font-weight: 400; line-height: 20px; letter-spacing: -0.084px; border-left: 3px solid transparent; }
+  .sidebar-item:hover { background: var(--gray-100); }
+  .sidebar-item.active { color: var(--black); font-weight: 600; }
+  .sidebar-item svg { width: 20px; height: 20px; color: var(--gray-600); flex-shrink: 0; }
+  .sidebar-sub { padding-left: 52px; font-size: 13px; color: var(--gray-700); }
+  .sidebar-divider { height: 1px; background: var(--gray-200); margin: 4px 0; }
+  .sidebar-collapse { display: flex; align-items: center; gap: 8px; padding: 16px 20px; font-size: 13px; color: var(--gray-700); cursor: pointer; border-top: 1px solid var(--gray-200); margin-top: auto; }
+
+  /* Content area */
+  .content { flex: 1; padding: 0; min-width: 0; }
+
+  /* Property header */
+  .property-header { padding: 20px 0 0; }
+  .property-name-row { display: flex; align-items: center; gap: 12px; }
+  .property-title { font-size: 22px; font-weight: 700; line-height: 32px; letter-spacing: -0.3px; }
+  .property-id { font-size: 14px; color: var(--gray-700); background: var(--gray-100); padding: 2px 6px; border-radius: 4px; font-weight: 500; line-height: 20px; }
+  .property-tabs { display: flex; gap: 0; margin-top: 16px; border-bottom: 2px solid var(--gray-200); }
+  .property-tab { padding: 16px 16px 14px; font-size: 14px; color: var(--gray-700); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; font-weight: 500; line-height: 20px; letter-spacing: -0.084px; }
+  .property-tab:first-child { padding-left: 0; }
+  .property-tab.active { color: var(--black); border-bottom-color: var(--black); font-weight: 600; }
+
+  /* Config layout */
+  .config-layout { display: flex; gap: 42px; padding: 24px 0; }
+
+  /* Config sidebar */
+  .config-sidebar { width: 292px; flex-shrink: 0; display: flex; flex-direction: column; gap: 4px; }
+  .progress-bar { background: #E8F6F3; border: 1px solid #038600; border-radius: 6px; padding: 12px; margin-bottom: 12px; }
+  .progress-label { color: var(--black); font-size: 14px; display: flex; gap: 4px; line-height: 20px; letter-spacing: -0.1px; }
+  .progress-label strong { font-weight: 500; }
+  .progress-track { height: 10px; background: var(--gray-200); border-radius: 10px; margin-top: 6px; position: relative; }
+  .progress-fill { height: 100%; background: #038600; border-radius: 10px; width: 40%; }
+
+  .config-item { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; line-height: 20px; letter-spacing: -0.084px; }
+  .config-item:hover { background: var(--gray-50); }
+  .config-item.active { background: rgba(0, 128, 157, 0.05); border-left: 3px solid var(--petrol); }
+  .config-item .check { width: 20px; height: 20px; border-radius: 50%; background: var(--success); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .config-item .check svg { width: 12px; height: 12px; color: white; }
+  .config-item .check.empty { background: var(--gray-200); }
+  .config-item .check.error { background: var(--error); }
+  .config-item .arrow { margin-left: auto; color: var(--gray-600); font-size: 16px; }
+  .config-item .subtitle { font-size: 12px; color: var(--gray-600); font-weight: 400; }
+  .config-item .label-col { display: flex; flex-direction: column; gap: 2px; }
+
+  /* Pricing section */
+  .pricing-section { flex: 1; min-width: 0; max-width: 1050px; }
+  .section-title { font-size: 20px; font-weight: 700; margin-bottom: 20px; line-height: 28px; letter-spacing: -0.3px; }
+
+  /* Banner */
+  .chart-toggle { display:inline-flex; align-items:center; gap:8px; padding:4px 12px 4px 4px; border-radius:20px; border:none; background:transparent; cursor:pointer; transition: all 0.2s; user-select:none; }
+  .chart-toggle .toggle-label { font-size: 13px; font-weight: 500; color: var(--black); line-height: 20px; }
+  .chart-toggle:not(.active) .toggle-label { color: var(--gray-500); }
+  .toggle-switch { position:relative; width:36px; height:20px; border-radius:10px; background:var(--petrol); transition: background 0.2s; flex-shrink:0; }
+  .toggle-switch .toggle-knob { position:absolute; top:2px; left:18px; width:16px; height:16px; border-radius:50%; background:var(--white); box-shadow:0 1px 3px rgba(0,0,0,0.2); transition: left 0.2s; }
+  .chart-toggle:not(.active) .toggle-switch { background: var(--gray-300); }
+  .chart-toggle:not(.active) .toggle-switch .toggle-knob { left:2px; }
+  .chart-empty-state { position: relative; border-radius: 12px; overflow: hidden; margin-bottom: 24px; min-height: 300px; background: var(--white); border: 1px solid var(--gray-200); }
+  .chart-blurred { position: absolute; inset: 0; padding: 24px 32px; filter: blur(4px); opacity: 0.4; pointer-events: none; }
+  .chart-blurred .chart-svg { width: 100%; height: 100%; }
+  .chart-empty-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; gap: 20px; background: rgba(255,255,255,0.4); border-radius: 12px; }
+  .empty-state-text { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .lock-icon { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
+  .empty-state-title { font-size: 20px; font-weight: 700; color: var(--black); line-height: 28px; letter-spacing: -0.34px; }
+  .empty-state-desc { font-size: 16px; font-weight: 400; color: var(--black); line-height: 24px; max-width: 612px; letter-spacing: -0.176px; }
+  .btn-choose { background: #00A2B5; color: var(--white); border: none; padding: 8px 24px; border-radius: 8px; font-size: 18px; font-weight: 700; cursor: pointer; line-height: 28px; letter-spacing: -0.252px; }
+  .btn-choose:hover { background: #008fa0; }
+  .btn-primary { background: var(--petrol); color: var(--white); border: none; padding: 12px 24px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; white-space: nowrap; line-height: 24px; letter-spacing: -0.18px; }
+  .btn-primary:hover { background: var(--petrol-hover); }
+  .btn-discovery { background: var(--discovery); }
+  .btn-discovery:hover { background: #4840d4; }
+
+  /* Toggle row */
+  .toggle-row { display: flex; gap: 24px; margin-bottom: 16px; }
+  .toggle-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--gray-800); }
+  .toggle-switch { width: 36px; height: 20px; background: var(--petrol); border-radius: 10px; position: relative; cursor: pointer; }
+  .toggle-switch::after { content: ''; width: 16px; height: 16px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 18px; transition: left 0.2s; }
+  .toggle-switch.off { background: var(--gray-300); }
+  .toggle-switch.off::after { left: 2px; }
+  .info-icon { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--gray-400); display: inline-flex; align-items: center; justify-content: center; font-size: 9px; color: var(--gray-600); cursor: help; font-weight: 600; }
+
+  /* Chart */
+  .chart-container { background: var(--white); border: 1px solid var(--gray-200); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+  .chart-area { height: 260px; position: relative; margin: 16px 0; }
+  .chart-svg { width: 100%; height: 100%; }
+  .chart-legend { display: flex; gap: 20px; flex-wrap: wrap; padding-top: 12px; border-top: 1px solid var(--gray-100); }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--gray-600); line-height: 16px; }
+  .legend-dot { width: 10px; height: 3px; border-radius: 2px; }
+  .legend-dot.prices { background: var(--black); height: 3px; }
+  .legend-dot.no-prices { background: #B8E6B8; height: 3px; }
+  .legend-dot.demand { background: var(--demand-orange); height: 10px; width: 10px; border-radius: 50%; opacity: 0.5; }
+  .legend-dot.season-split { background: transparent; border-top: 2px dashed var(--petrol); width: 16px; }
+  .legend-dot.similar { background: var(--gray-400); height: 3px; }
+
+  /* Seasons table */
+  .seasons-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .seasons-title { font-size: 18px; font-weight: 700; line-height: 28px; letter-spacing: -1.4px; }
+  .btn-outline { background: var(--white); border: 1px solid var(--petrol); color: var(--petrol); padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; line-height: 20px; }
+  .btn-outline:hover { background: rgba(0, 128, 157, 0.06); }
+  .edit-icon-cell { cursor: pointer; color: var(--petrol); display: flex; align-items: center; justify-content: center; }
+  .edit-icon-cell:hover { color: var(--petrol-hover); }
+
+  .seasons-table { width: 100%; border-collapse: collapse; background: var(--white); border-radius: 8px; overflow: hidden; border: 1px solid var(--gray-200); }
+  .seasons-table th { text-align: left; padding: 14px 16px; font-size: 12px; font-weight: 600; color: var(--gray-600); border-bottom: 1px solid var(--gray-200); background: var(--white); line-height: 16px; }
+  .seasons-table td { padding: 14px 16px; font-size: 14px; border-bottom: 1px solid var(--gray-100); line-height: 20px; letter-spacing: -0.084px; }
+  .seasons-table tr:last-child td { border-bottom: none; }
+  .peers-avg { font-weight: 600; color: var(--black); }
+  .edit-icon { width: 20px; height: 20px; color: var(--gray-600); cursor: pointer; }
+
+  /* ===================== */
+  /* WIZARD STYLES         */
+  /* ===================== */
+  .wizard-page { display: none; }
+  .wizard-page.active { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+  .wizard-scroll-content { flex: 1; overflow-y: auto; padding-bottom: 16px; min-height: 0; }
+  .pricing-section.wizard-active { display: flex; flex-direction: column; height: calc(100vh - 64px - 56px - 48px - 60px); overflow: hidden; }
+  .overview-page { display: block; }
+  .overview-page.hidden { display: none; }
+
+  .back-link { display: flex; align-items: center; gap: 4px; color: var(--petrol); font-size: 14px; font-weight: 600; cursor: pointer; margin-bottom: 20px; text-decoration: none; line-height: 20px; letter-spacing: -0.084px; padding: 12px 0; }
+  .back-link:hover { text-decoration: underline; }
+  .back-link svg { width: 24px; height: 24px; color: var(--petrol); }
+
+  .wizard-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; line-height: 28px; letter-spacing: -0.3px; }
+  .wizard-desc { font-size: 16px; font-weight: 400; color: var(--gray-700); line-height: 24px; letter-spacing: -0.176px; margin-bottom: 24px; }
+
+  /* Rate summary */
+  .rate-summary { display: flex; gap: 20px; margin-bottom: 16px; }
+  .rate-item { display: flex; flex-direction: column; gap: 4px; padding: 4px 12px; border-radius: 8px; min-width: 130px; }
+  .rate-label { font-size: 14px; color: var(--black); font-weight: 400; line-height: 20px; letter-spacing: -0.084px; }
+  .rate-value { font-size: 18px; font-weight: 700; line-height: 28px; letter-spacing: -0.252px; color: var(--black); }
+
+  /* Wizard chart */
+  .wizard-chart-container { background: var(--white); border-radius: 24px; padding: 28px 0 0; margin-bottom: 24px; }
+  .wizard-chart-legend { display: flex; gap: 16px; padding-top: 12px; margin-top: 8px; justify-content: center; }
+
+  /* Question section */
+  .question-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; line-height: 28px; letter-spacing: -0.3px; }
+  .question-desc { font-size: 14px; color: var(--black); margin-bottom: 24px; line-height: 20px; letter-spacing: -0.084px; font-weight: 400; }
+
+  /* Pricing level cards */
+  .level-cards { display: flex; gap: 16px; margin-bottom: 32px; }
+  .level-card { flex: 1; border: 1px solid var(--gray-300); border-radius: 16px; padding: 16px; cursor: pointer; transition: all 0.15s ease; }
+  .level-card:hover { border-color: var(--gray-400); }
+  .level-card.selected { border-color: var(--petrol); background: var(--petrol-5); }
+  .level-card-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 4px; }
+  .radio-circle { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--gray-400); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s ease; }
+  .level-card.selected .radio-circle { border-color: var(--petrol); background: var(--petrol); }
+  .radio-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--white); display: none; }
+  .level-card.selected .radio-dot { display: block; }
+  .level-card-title { font-size: 16px; font-weight: 600; line-height: 24px; letter-spacing: -0.18px; color: var(--black); }
+  .level-card-desc { font-size: 14px; color: var(--gray-800); line-height: 20px; letter-spacing: -0.084px; font-weight: 400; }
+
+  /* Bottom bar */
+  .bottom-bar { flex-shrink: 0; background: var(--white); border-top: 1px solid var(--gray-200); padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; z-index: 50; }
+  .bottom-bar-step-info { display: flex; align-items: center; gap: 8px; font-size: 12px; line-height: 16px; }
+  .bottom-bar-step-info .step-name { font-weight: 600; color: var(--black); }
+  .bottom-bar-step-info .step-dot { font-weight: 500; color: var(--gray-700); }
+  .bottom-bar-step-info .step-count { font-weight: 400; color: var(--gray-600); }
+  .bottom-bar-actions { display: flex; gap: 24px; align-items: center; }
+  .btn-cancel { background: var(--white); border: 1px solid var(--gray-400); padding: 12px 24px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; color: var(--black); line-height: 24px; letter-spacing: -0.18px; min-width: 150px; text-align: center; }
+  .btn-cancel:hover { background: var(--gray-50); }
+  .btn-next { background: var(--petrol); color: var(--white); border: none; padding: 12px 24px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; line-height: 24px; letter-spacing: -0.18px; white-space: nowrap; transition: background 0.2s; }
+  .btn-next:hover:not(:disabled) { background: var(--petrol-hover); }
+  .btn-next:disabled { background: var(--gray-200); color: #938F8B; cursor: default; }
+
+  /* Step 2 — Sliders */
+  .step-hidden { display: none; }
+  .adjust-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; line-height: 28px; letter-spacing: -1.4px; }
+  .adjust-desc { font-size: 14px; color: var(--gray-700); line-height: 20px; letter-spacing: -0.084px; margin-bottom: 24px; }
+  .sliders-row { display: flex; gap: 64px; }
+  .slider-card { flex: 1; background: var(--white); border: 1px solid var(--gray-200); border-radius: 12px; padding: 12px; overflow: hidden; }
+  .slider-card-title { font-size: 16px; font-weight: 600; color: var(--black); line-height: 24px; letter-spacing: -0.176px; margin-bottom: 4px; }
+  .slider-card-desc { font-size: 14px; color: var(--gray-700); line-height: 20px; letter-spacing: -0.084px; margin-bottom: 0; }
+  .slider-wrapper { position: relative; height: 44px; margin-bottom: 4px; }
+  .slider-rail { position: absolute; top: 50%; left: 0; right: 0; height: 4px; background: var(--discovery); opacity: 0.38; border-radius: 100px; transform: translateY(-50%); }
+  .slider-track { position: absolute; top: 50%; left: 0; height: 6px; background: var(--discovery); border-radius: 100px; transform: translateY(-50%); pointer-events: none; }
+  .slider-input { -webkit-appearance: none; appearance: none; width: 100%; height: 44px; background: transparent; position: absolute; top: 0; left: 0; margin: 0; cursor: pointer; z-index: 2; }
+  .slider-input::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; background: var(--discovery); border-radius: 50%; cursor: pointer; box-shadow: 0 3px 1px -2px rgba(0,0,0,0.2), 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12); border: none; }
+  .slider-input::-moz-range-thumb { width: 20px; height: 20px; background: var(--discovery); border-radius: 50%; cursor: pointer; box-shadow: 0 3px 1px -2px rgba(0,0,0,0.2), 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12); border: none; }
+  .slider-marks { position: absolute; top: 50%; left: 0; right: 0; transform: translateY(-50%); display: flex; justify-content: space-between; pointer-events: none; }
+  .slider-mark { width: 2px; height: 2px; background: var(--discovery); border-radius: 100px; }
+  .slider-labels { display: flex; justify-content: space-between; }
+  .slider-label-text { font-size: 14px; color: rgba(0,0,0,0.6); line-height: 20px; letter-spacing: 0.17px; }
+
+  /* Bottom bar back button */
+  .bottom-bar-back { display: flex; align-items: center; gap: 0; cursor: pointer; }
+  .bottom-bar-back svg { width: 24px; height: 24px; color: var(--black); }
+  .bottom-bar-back span { font-size: 12px; font-weight: 600; color: var(--black); line-height: 16px; }
+
+  /* Transitions */
+  .fade-in { animation: fadeIn 0.3s ease-in; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Mobile responsive */
+  @media (max-width: 768px) {
+    .app { flex-direction: column; }
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .content { padding: 12px; }
+    .config-layout { flex-direction: column; gap: 0; padding: 0; }
+    .config-tabs { display: none; }
+    .pricing-section { max-width: 100%; }
+    .pricing-section.wizard-active { height: calc(100vh - 64px - 24px); }
+    .navbar { padding: 0 12px; }
+    .rate-summary { flex-wrap: wrap; gap: 12px; }
+    .rate-item { min-width: calc(50% - 12px); }
+    .level-cards { flex-direction: column; }
+    .sliders-row { flex-direction: column; gap: 16px; }
+    .seasons-table { font-size: 12px; display: block; overflow-x: auto; white-space: nowrap; }
+    .wizard-chart-container { overflow-x: auto; }
+    .wizard-chart-container svg { min-width: 600px; }
+    .chart-empty-state { min-height: 200px; }
+    .chart-empty-overlay { padding: 16px; }
+    .empty-state-title { font-size: 16px; }
+    .empty-state-desc { font-size: 14px; }
+    .btn-choose { font-size: 14px; padding: 8px 16px; }
+    .bottom-bar { padding: 10px 12px; flex-wrap: wrap; gap: 8px; }
+    #wizard-bottom-bar-steps { flex-wrap: wrap; gap: 12px; justify-content: center; }
+    #wizard-bottom-bar-steps > div { order: -1; width: 100%; max-width: 100%; }
+    #wizard-bottom-bar-steps > button { flex: 1; min-width: 0; }
+    #finetune-banner { flex-direction: column; gap: 12px; }
+    #finetune-banner button { white-space: normal; margin-left: 0 !important; width: 100%; }
+    #unlocked-chart { overflow-x: auto; }
+    #unlocked-chart svg { min-width: 600px; }
+    .chart-toggle { padding: 2px 8px 2px 2px; }
+    .toggle-label { font-size: 11px; }
+    .wizard-title { font-size: 18px; }
+    .wizard-desc { font-size: 13px; }
+    #step2-category-line { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- Top bar — white background per Figma -->
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-logo">
+        <svg viewBox="0 0 162 50" fill="none" xmlns="http://www.w3.org/2000/svg" style="height:36px;width:auto;">
+          <circle cx="18" cy="25" r="18" fill="#00809D"/>
+          <text x="9" y="31" fill="white" font-family="Inter,sans-serif" font-size="18" font-weight="700">H</text>
+          <text x="42" y="33" fill="#2B2926" font-family="Inter,sans-serif" font-size="22" font-weight="700" letter-spacing="0.5">HOLIDU</text>
+        </svg>
+      </div>
+      <div class="topbar-user">
+        <div class="topbar-avatar">CD</div>
+        <span class="topbar-username">Celine Dion</span>
+        <span class="topbar-chevron">▾</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- Left sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <a class="sidebar-item" href="#">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 10l7-7 7 7M5 8v8a1 1 0 001 1h3v-4h2v4h3a1 1 0 001-1V8"/></svg>
+          Home
+        </a>
+        <a class="sidebar-item" href="#">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h12v10H6l-2 2V4z"/></svg>
+          Assistant
+        </a>
+        <a class="sidebar-item" href="#">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="14" height="12" rx="1"/><path d="M3 8h14"/></svg>
+          Bookings
+        </a>
+        <a class="sidebar-item" href="#">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="14" height="12" rx="1"/><path d="M7 2v4M13 2v4M3 8h14"/></svg>
+          Calendar
+        </a>
+        <a class="sidebar-item" href="#">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="14" height="14" rx="1"/><path d="M8 7h4M8 10h4M8 13h2"/></svg>
+          Properties
+        </a>
+        <a class="sidebar-item" href="#">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="7" r="3"/><path d="M4 17c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
+          Hosts
+        </a>
+        <a class="sidebar-item" href="#">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 15l4-8 3 4 3-6 4 10"/></svg>
+          Performance
+        </a>
+      </div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-section">
+        <a class="sidebar-item" href="#" style="font-size:13px">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" style="width:16px;height:16px"><path d="M3 5h14M3 10h14M3 15h14"/></svg>
+          Direct bookings
+        </a>
+        <a class="sidebar-item sidebar-sub" href="#">My website & wi...</a>
+        <a class="sidebar-item sidebar-sub" href="#">Google business...</a>
+      </div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-section">
+        <a class="sidebar-item" href="#" style="font-size:13px">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" style="width:16px;height:16px"><path d="M10 2v16M2 10h16"/></svg>
+          Financials
+        </a>
+        <a class="sidebar-item sidebar-sub" href="#">Payouts</a>
+        <a class="sidebar-item sidebar-sub" href="#">My invoices</a>
+        <a class="sidebar-item sidebar-sub" href="#">Guest invoices</a>
+      </div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-section">
+        <a class="sidebar-item" href="#" style="font-size:13px">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" style="width:16px;height:16px"><circle cx="10" cy="10" r="6"/><path d="M10 4v6l3 3"/></svg>
+          Tools
+        </a>
+        <a class="sidebar-item sidebar-sub" href="#">Guest connect</a>
+        <a class="sidebar-item sidebar-sub" href="#">Referral program</a>
+        <a class="sidebar-item sidebar-sub" href="#">Online check-in</a>
+      </div>
+    </div>
+
+    <div class="content" style="padding: 0 32px;">
+      <!-- Property header -->
+      <div class="property-header">
+        <div class="property-name-row">
+          <div class="property-title">La Casa de las Flores</div>
+          <span class="property-id">ID 1394032</span>
+        </div>
+        <div class="property-tabs">
+          <div class="property-tab active">Configuration</div>
+          <div class="property-tab">Calendar</div>
+          <div class="property-tab">Bookings</div>
+          <div class="property-tab">Performance</div>
+          <div class="property-tab">Reviews</div>
+        </div>
+      </div>
+
+      <div class="config-layout">
+        <!-- Config sidebar -->
+        <div class="config-sidebar">
+          <div class="progress-bar">
+            <div class="progress-label"><strong>40%</strong> ready for publication</div>
+            <div class="progress-track"><div class="progress-fill"></div></div>
+          </div>
+          <div class="config-item"><span class="check"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><path d="M2 6l3 3 5-5"/></svg></span> General information* <span class="arrow">›</span></div>
+          <div class="config-item"><span class="check"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><path d="M2 6l3 3 5-5"/></svg></span> Location* <span class="arrow">›</span></div>
+          <div class="config-item"><span class="check"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><path d="M2 6l3 3 5-5"/></svg></span> Amenities* <span class="arrow">›</span></div>
+          <div class="config-item"><span class="check"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><path d="M2 6l3 3 5-5"/></svg></span> Sleeping arrangements* <span class="arrow">›</span></div>
+          <div class="config-item"><span class="check"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><path d="M2 6l3 3 5-5"/></svg></span> Title & description <span class="arrow">›</span></div>
+          <div class="config-item"><span class="check"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><path d="M2 6l3 3 5-5"/></svg></span> Photos* <span class="arrow">›</span></div>
+          <div class="config-item"><span class="check"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><path d="M2 6l3 3 5-5"/></svg></span> Guest arrival info <span class="arrow">›</span></div>
+          <div class="config-item active"><span class="check"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><path d="M2 6l3 3 5-5"/></svg></span> Pricing <span class="arrow">›</span></div>
+          <div class="config-item"><span class="check empty"></span> Discounts <span class="arrow">›</span></div>
+          <div class="config-item">
+            <span class="check error"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><path d="M3 3l6 6M9 3l-6 6"/></svg></span>
+            <span class="label-col">Additional fees & Protection <span class="subtitle" style="color:var(--error)">Missing information</span></span>
+            <span class="arrow">›</span>
+          </div>
+          <div class="config-item"><span class="check"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><path d="M2 6l3 3 5-5"/></svg></span> <span class="label-col">Distributions channels <span class="subtitle">23 out of 24 enabled</span></span> <span class="arrow">›</span></div>
+          <div class="config-item"><span class="check"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><path d="M2 6l3 3 5-5"/></svg></span> Cancellation policies* <span class="arrow">›</span></div>
+          <div class="config-item"><span class="check empty"></span> Collaborators <span class="arrow">›</span></div>
+        </div>
+
+        <!-- Main content area -->
+        <div class="pricing-section">
+
+          <!-- ========== OVERVIEW PAGE ========== -->
+          <div id="overview-page" class="overview-page">
+            <div class="section-title">Pricing overview</div>
+
+            <div class="chart-empty-state">
+              <div class="chart-blurred">
+                <svg class="chart-svg" viewBox="0 0 1000 260" preserveAspectRatio="xMidYMid meet">
+                  <circle cx="30" cy="18" r="8" fill="var(--petrol)" opacity="0.7"/>
+                  <rect x="45" y="11" width="80" height="14" rx="3" fill="var(--gray-300)"/>
+                  <circle cx="160" cy="18" r="8" fill="var(--petrol)" opacity="0.7"/>
+                  <rect x="175" y="11" width="100" height="14" rx="3" fill="var(--gray-300)"/>
+                  <line x1="35" y1="52" x2="960" y2="52" stroke="var(--gray-200)"/>
+                  <line x1="35" y1="112" x2="960" y2="112" stroke="var(--gray-200)"/>
+                  <line x1="35" y1="172" x2="960" y2="172" stroke="var(--gray-200)"/>
+                  <line x1="35" y1="210" x2="960" y2="210" stroke="var(--gray-300)"/>
+                  <path d="M35,200 L110,196 L185,190 L260,180 L335,165 L410,135 L485,100 L560,80 L635,65 L710,72 L785,110 L860,160 L935,192 L935,210 L35,210 Z" fill="rgba(255,183,77,0.18)"/>
+                  <path d="M35,162 L110,162 L185,162 L260,162 L335,162 L410,130 L485,108 L560,72 L635,62 L710,80 L785,128 L860,162 L935,162" fill="none" stroke="var(--black)" stroke-width="2.5"/>
+                  <rect x="910" y="58" width="30" height="152" rx="3" fill="var(--petrol)" opacity="0.35"/>
+                  <rect x="945" y="120" width="20" height="90" rx="3" fill="rgba(255,183,77,0.4)"/>
+                </svg>
+              </div>
+              <div class="chart-empty-overlay">
+                <div class="empty-state-text">
+                  <div class="lock-icon">
+                    <svg width="24" height="24" viewBox="0 0 29.3333 29.3333" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path fill-rule="evenodd" clip-rule="evenodd" d="M17.1939 1.17041C17.9957 -0.390136 20.2265 -0.390136 21.0283 1.17041L23.4499 5.88344L28.1629 8.30501C29.7235 9.10681 29.7235 11.3376 28.1629 12.1394L23.4499 14.561L21.0283 19.274C20.2265 20.8346 17.9957 20.8346 17.1939 19.274L14.7723 14.561L10.0593 12.1394C8.49875 11.3376 8.49875 9.10681 10.0593 8.30501L14.7723 5.88344L17.1939 1.17041ZM19.1111 3.27404L21.153 7.24816C21.3588 7.6486 21.6847 7.97456 22.0852 8.18031L26.0593 10.2222L22.0852 12.2641C21.6847 12.4699 21.3588 12.7958 21.153 13.1963L19.1111 17.1704L17.0692 13.1963C16.8635 12.7958 16.5375 12.4699 16.1371 12.2641L12.1629 10.2222L16.1371 8.18031C16.5375 7.97457 16.8635 7.6486 17.0692 7.24816L19.1111 3.27404ZM5.29953 16.0112C6.11912 14.416 8.3994 14.416 9.21899 16.0112L10.6117 18.7217L13.3222 20.1143C14.9173 20.9339 14.9173 23.2142 13.3222 24.0338L10.6117 25.4265L9.21899 28.137C8.3994 29.7321 6.11912 29.7321 5.29953 28.137L3.90687 25.4265L1.19636 24.0338C-0.398794 23.2142 -0.398781 20.9339 1.19636 20.1143L3.90687 18.7217L5.29953 16.0112ZM7.25926 18.0321L6.21075 20.0727C6.00044 20.4821 5.66725 20.8153 5.25793 21.0256L3.21724 22.0741L5.25793 23.1226C5.66725 23.3329 6.00044 23.6661 6.21075 24.0754L7.25926 26.1161L8.30777 24.0754C8.51808 23.6661 8.85127 23.3329 9.26059 23.1226L11.3013 22.0741L9.26059 21.0256C8.85127 20.8153 8.51808 20.4821 8.30777 20.0727L7.25926 18.0321Z" fill="#2B2926"/>
+                    </svg>
+                  </div>
+                  <h3 class="empty-state-title">A smarter way to set seasonal prices</h3>
+                  <p class="empty-state-desc">Compare your property with similar homes and align your prices with market trends in minutes. Start by selecting your pricing category.</p>
+                </div>
+                <button class="btn-choose" onclick="showWizard()">Start with category</button>
+              </div>
+            </div>
+
+            <!-- Unlocked graph (shown after category applied via "Not now") -->
+            <div id="unlocked-chart" class="unlocked-chart" style="display:none; margin-bottom:32px;">
+              <!-- Chart container with toggles inside -->
+              <div style="border:1px solid var(--gray-200); border-radius:12px; padding:20px; background:var(--white);">
+                <!-- Toggle pills -->
+                <div style="display:flex; gap:16px; margin-bottom:16px;">
+                  <div id="toggle-demand" class="chart-toggle active" onclick="toggleChartLayer('demand')">
+                    <div class="toggle-switch"><div class="toggle-knob"></div></div>
+                    <span class="toggle-label">Market demand</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gray-400)" stroke-width="2" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>
+                  </div>
+                  <div id="toggle-similar" class="chart-toggle active" onclick="toggleChartLayer('similar')">
+                    <div class="toggle-switch"><div class="toggle-knob"></div></div>
+                    <span class="toggle-label">Similar properties</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gray-400)" stroke-width="2" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>
+                  </div>
+                </div>
+                <svg id="unlocked-svg" class="chart-svg" viewBox="0 0 1050 260" preserveAspectRatio="xMidYMid meet" style="width:100%;height:230px;">
+                  <!-- Y axis -->
+                  <text x="8" y="145" fill="var(--gray-700)" font-size="10" transform="rotate(-90, 8, 145)" text-anchor="middle" font-family="Inter,sans-serif">Nightly rate (€)</text>
+                  <text x="28" y="52" fill="var(--black)" font-size="11" font-family="Inter,sans-serif">320€</text>
+                  <text x="28" y="125" fill="var(--black)" font-size="11" font-family="Inter,sans-serif">200€</text>
+                  <text x="28" y="210" fill="var(--black)" font-size="11" font-family="Inter,sans-serif">0€</text>
+                  <!-- Grid -->
+                  <line x1="48" y1="45" x2="960" y2="45" stroke="var(--gray-200)"/>
+                  <line x1="48" y1="120" x2="960" y2="120" stroke="var(--gray-200)"/>
+                  <line x1="48" y1="205" x2="960" y2="205" stroke="var(--gray-300)"/>
+                  <!-- Similar properties (gray area) -->
+                  <path id="unlocked-similar" fill="rgba(0,0,0,0.07)" />
+                  <!-- Market demand (yellow-green area) -->
+                  <path id="unlocked-demand" fill="rgba(186,199,38,0.25)" />
+                  <!-- No prices hatched areas -->
+                  <defs>
+                    <pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                      <line x1="0" y1="0" x2="0" y2="8" stroke="rgba(229,115,115,0.5)" stroke-width="2.5"/>
+                    </pattern>
+                  </defs>
+                  <rect id="unlocked-noprice1" fill="url(#hatch)" />
+                  <rect id="unlocked-noprice2" fill="url(#hatch)" />
+                  <!-- Your prices (black stepped line) -->
+                  <path id="unlocked-prices" fill="none" stroke="var(--black)" stroke-width="2.5" />
+                  <!-- Recommended season split (blue dashed stepped) -->
+                  <path id="unlocked-recommended" fill="none" stroke="#5A50EB" stroke-width="2" stroke-dasharray="6,4" />
+                  <!-- X axis labels -->
+                  <text x="60" y="230" fill="var(--gray-700)" font-size="12" font-weight="600" font-family="Inter,sans-serif">Jan '26</text>
+                  <text x="134" y="230" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Feb</text>
+                  <text x="208" y="230" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Mar</text>
+                  <text x="282" y="230" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Apr</text>
+                  <text x="356" y="230" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">May</text>
+                  <text x="430" y="230" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">June</text>
+                  <text x="504" y="230" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">July</text>
+                  <text x="578" y="230" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Aug</text>
+                  <text x="652" y="230" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Sept</text>
+                  <text x="726" y="230" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Oct</text>
+                  <text x="800" y="230" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Nov</text>
+                  <text x="874" y="230" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Dec</text>
+                  <text x="940" y="230" fill="var(--gray-700)" font-size="12" font-weight="600" font-family="Inter,sans-serif">Jan' 27</text>
+                  <!-- Right Y axis demand labels -->
+                  <text x="978" y="55" fill="var(--gray-600)" font-size="11" font-weight="600" font-family="Inter,sans-serif">High</text>
+                  <text x="978" y="130" fill="var(--gray-600)" font-size="11" font-weight="600" font-family="Inter,sans-serif">Mid</text>
+                  <text x="978" y="130" fill="var(--gray-500)" font-size="9" font-family="Inter,sans-serif" dy="12">Demand</text>
+                  <text x="978" y="208" fill="var(--gray-600)" font-size="11" font-weight="600" font-family="Inter,sans-serif">Low</text>
+                </svg>
+                <!-- Legend -->
+                <div style="display:flex; justify-content:center; gap:20px; margin-top:8px; flex-wrap:wrap;">
+                  <div class="legend-item"><svg width="20" height="4" style="flex-shrink:0;"><line x1="0" y1="2" x2="20" y2="2" stroke="var(--black)" stroke-width="2.5"/></svg><span style="color:var(--gray-800); font-size:12px;">Your prices</span></div>
+                  <div class="legend-item" id="legend-noprices"><svg width="20" height="12" style="flex-shrink:0;"><defs><pattern id="hatch-legend" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="5" stroke="rgba(229,115,115,0.6)" stroke-width="1.5"/></pattern></defs><rect width="20" height="12" rx="2" fill="url(#hatch-legend)"/></svg><span style="color:var(--gray-800); font-size:12px;">No prices</span></div>
+                  <div class="legend-item" id="legend-recommended"><svg width="20" height="4" style="flex-shrink:0;"><line x1="0" y1="2" x2="20" y2="2" stroke="#5A50EB" stroke-width="2" stroke-dasharray="4,3"/></svg><span style="color:var(--gray-800); font-size:12px;">Recommended season split</span></div>
+                  <div class="legend-item"><svg width="20" height="8" style="flex-shrink:0;"><rect width="20" height="8" rx="3" fill="rgba(186,199,38,0.4)"/></svg><span style="color:var(--gray-800); font-size:12px;">Market demand</span></div>
+                  <div class="legend-item"><svg width="20" height="8" style="flex-shrink:0;"><rect width="20" height="8" rx="3" fill="rgba(0,0,0,0.10)"/></svg><span style="color:var(--gray-800); font-size:12px;">Similar properties</span></div>
+                </div>
+                <!-- Banner to re-enter wizard (inside chart card, below legend) -->
+                <div id="finetune-banner" style="display:none; align-items:center; justify-content:space-between; padding:20px 24px; margin-top:16px; background:rgba(90,80,235,0.05); border-radius:12px;">
+                  <div style="flex:1;">
+                    <div style="font-size:16px; font-weight:700; color:var(--black); line-height:24px;">Your pricing is flat — the market isn't.</div>
+                    <div style="font-size:14px; color:var(--gray-700); line-height:20px; margin-top:4px;">Right now, you charge the same price all year. This means you might be missing out on high-value bookings in the summer and losing guests to cheaper competitors in the winter.</div>
+                  </div>
+                  <button style="background:#5A50EB; color:var(--white); border:none; padding:12px 24px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; white-space:nowrap; margin-left:24px; letter-spacing:-0.1px;" onclick="showWizard()">Fine-tune &amp; Sync with Market</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Seasons table -->
+            <div class="seasons-header">
+              <div class="seasons-title">Seasons details</div>
+              <button class="btn-outline">+ New price</button>
+            </div>
+            <table class="seasons-table">
+              <thead>
+                <tr>
+                  <th>Season dates</th>
+                  <th>Nightly rate</th>
+                  <th>Weekend nightly rate</th>
+                  <th>Minimum stay</th>
+                  <th>Check-in</th>
+                  <th>Check-out</th>
+                  <th></th>
+                  <th>Peers average</th>
+                </tr>
+              </thead>
+              <tbody id="overview-tbody">
+                <tr><td>Thu, Jan 1 - Fri, Sep 30, 2026</td><td>155€</td><td>175€</td><td>2 nights</td><td>All week</td><td>All week</td><td class="edit-icon-cell"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></td><td class="peers-avg">180€</td></tr>
+                <tr><td>Wed, Oct 1 - Thu, Feb 28, 2027</td><td>135€</td><td>155€</td><td>2 nights</td><td>All week</td><td>All week</td><td class="edit-icon-cell"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></td><td class="peers-avg">150€</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- ========== WIZARD PAGE ========== -->
+          <div id="wizard-page" class="wizard-page">
+            <div class="wizard-scroll-content">
+            <a class="back-link" onclick="showOverview()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+              Back to pricing
+            </a>
+            <div class="wizard-title">Where does your property fit in the market?</div>
+            <div class="wizard-desc">Choose the category that matches your home. We will show typical nightly price ranges from similar properties across seasons.</div>
+
+            <!-- Step 1: select category -->
+            <div id="step-1" class="fade-in" style="flex:1;">
+              <div class="level-cards">
+                <div class="level-card" onclick="selectLevel(this)">
+                  <div class="level-card-header"><div class="radio-circle"><div class="radio-dot"></div></div><div class="level-card-title">Budget-friendly</div></div>
+                  <div class="level-card-desc">Simple and functional. Best for guests looking for great value.</div>
+                </div>
+                <div class="level-card" onclick="selectLevel(this)">
+                  <div class="level-card-header"><div class="radio-circle"><div class="radio-dot"></div></div><div class="level-card-title">Standard</div></div>
+                  <div class="level-card-desc">Typical comfort and amenities. Similar to most homes in your area.</div>
+                </div>
+                <div class="level-card" onclick="selectLevel(this)">
+                  <div class="level-card-header"><div class="radio-circle"><div class="radio-dot"></div></div><div class="level-card-title">Premium</div></div>
+                  <div class="level-card-desc">Extra comfort, unique design, or a prime location. Compared with top homes nearby.</div>
+                </div>
+              </div>
+              <div class="rate-summary">
+                <div class="rate-item"><div class="rate-label">Annual average rate</div><div class="rate-value" id="rate-avg">€</div></div>
+                <div class="rate-item"><div class="rate-label">Low season rate</div><div class="rate-value" id="rate-low">€</div></div>
+                <div class="rate-item"><div class="rate-label">Peak season rate</div><div class="rate-value" id="rate-peak">€</div></div>
+              </div>
+              <div class="wizard-chart-container" id="wizard-chart">
+                <svg class="chart-svg" viewBox="0 0 1050 226" preserveAspectRatio="xMidYMid meet" style="width:100%;height:200px;">
+                  <text x="8" y="130" fill="var(--gray-700)" font-size="10" transform="rotate(-90, 8, 130)" text-anchor="middle" font-family="Inter,sans-serif">Nightly rate (€)</text>
+                  <text x="28" y="22" fill="var(--black)" font-size="11" font-family="Inter,sans-serif">320€</text>
+                  <text x="28" y="115" fill="var(--black)" font-size="11" font-family="Inter,sans-serif">200€</text>
+                  <text x="28" y="210" fill="var(--black)" font-size="11" font-family="Inter,sans-serif">0€</text>
+                  <line x1="48" y1="15" x2="1040" y2="15" stroke="var(--black-16)"/>
+                  <line x1="48" y1="110" x2="1040" y2="110" stroke="var(--black-16)"/>
+                  <line x1="48" y1="205" x2="1040" y2="205" stroke="var(--black-40)"/>
+                  <path id="chart-area" fill="rgba(90,80,235,0.12)" />
+                  <path id="chart-stroke" fill="none" stroke="rgba(90,80,235,0.4)" stroke-width="2" />
+                  <text x="60" y="224" fill="var(--gray-700)" font-size="12" font-weight="600" font-family="Inter,sans-serif">Jan '26</text>
+                  <text x="134" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Feb</text>
+                  <text x="208" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Mar</text>
+                  <text x="282" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Apr</text>
+                  <text x="356" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">May</text>
+                  <text x="430" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">June</text>
+                  <text x="504" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">July</text>
+                  <text x="578" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Aug</text>
+                  <text x="652" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Sept</text>
+                  <text x="726" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Oct</text>
+                  <text x="800" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Nov</text>
+                  <text x="874" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Dec</text>
+                  <text x="940" y="224" fill="var(--gray-700)" font-size="12" font-weight="600" font-family="Inter,sans-serif">Jan' 27</text>
+                </svg>
+                <div class="wizard-chart-legend">
+                  <div class="legend-item">
+                    <svg width="20" height="6" style="flex-shrink:0;"><rect width="20" height="6" rx="3" fill="rgba(90,80,235,0.35)"/></svg>
+                    <span id="legend-label" style="color:var(--gray-800); font-size:12px; line-height:16px;">Similar properties</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 1b: Preview recommended prices -->
+            <div id="step-1b" class="fade-in step-hidden" style="flex:1;">
+              <div style="font-size:16px; font-weight:700; color:var(--black); line-height:24px; margin-bottom:4px;">Recommended seasonal rates</div>
+              <div style="font-size:14px; color:var(--gray-700); line-height:20px; margin-bottom:16px;" id="compare-sub">Based on similar properties in the Standard category.</div>
+              <div class="rate-summary">
+                <div class="rate-item"><div class="rate-label">Annual average rate</div><div class="rate-value" id="rate-avg-1b">180€</div></div>
+                <div class="rate-item"><div class="rate-label">Low season rate</div><div class="rate-value" id="rate-low-1b">110€</div></div>
+                <div class="rate-item"><div class="rate-label">Peak season rate</div><div class="rate-value" id="rate-peak-1b">260€</div></div>
+              </div>
+              <div class="wizard-chart-container">
+                <svg class="chart-svg" viewBox="0 0 1050 226" preserveAspectRatio="xMidYMid meet" style="width:100%;height:200px;">
+                  <text x="8" y="130" fill="var(--gray-700)" font-size="10" transform="rotate(-90, 8, 130)" text-anchor="middle" font-family="Inter,sans-serif">Nightly rate (€)</text>
+                  <text x="28" y="22" fill="var(--black)" font-size="11" font-family="Inter,sans-serif">320€</text>
+                  <text x="28" y="115" fill="var(--black)" font-size="11" font-family="Inter,sans-serif">200€</text>
+                  <text x="28" y="210" fill="var(--black)" font-size="11" font-family="Inter,sans-serif">0€</text>
+                  <line x1="48" y1="15" x2="1040" y2="15" stroke="var(--black-16)"/>
+                  <line x1="48" y1="110" x2="1040" y2="110" stroke="var(--black-16)"/>
+                  <line x1="48" y1="205" x2="1040" y2="205" stroke="var(--black-40)"/>
+                  <path id="chart1b-area" fill="rgba(90,80,235,0.12)" />
+                  <path id="chart1b-current" fill="none" stroke="var(--gray-600)" stroke-width="2" stroke-dasharray="6,4" />
+                  <path id="chart1b-recommended" fill="none" stroke="#5A50EB" stroke-width="2.5" />
+                  <text x="60" y="224" fill="var(--gray-700)" font-size="12" font-weight="600" font-family="Inter,sans-serif">Jan '26</text>
+                  <text x="134" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Feb</text>
+                  <text x="208" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Mar</text>
+                  <text x="282" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Apr</text>
+                  <text x="356" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">May</text>
+                  <text x="430" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">June</text>
+                  <text x="504" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">July</text>
+                  <text x="578" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Aug</text>
+                  <text x="652" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Sept</text>
+                  <text x="726" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Oct</text>
+                  <text x="800" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Nov</text>
+                  <text x="874" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Dec</text>
+                  <text x="940" y="224" fill="var(--gray-700)" font-size="12" font-weight="600" font-family="Inter,sans-serif">Jan' 27</text>
+                </svg>
+                <div class="wizard-chart-legend" style="justify-content:center; gap:24px;">
+                  <div class="legend-item"><svg width="20" height="3" style="flex-shrink:0;"><line x1="0" y1="1.5" x2="20" y2="1.5" stroke="var(--gray-600)" stroke-width="2" stroke-dasharray="4,3"/></svg><span style="color:var(--gray-800); font-size:12px;">Your current prices</span></div>
+                  <div class="legend-item"><svg width="20" height="3" style="flex-shrink:0;"><line x1="0" y1="1.5" x2="20" y2="1.5" stroke="#5A50EB" stroke-width="2.5"/></svg><span style="color:var(--gray-800); font-size:12px;">Recommended season split</span></div>
+                  <div class="legend-item"><svg width="20" height="6" style="flex-shrink:0;"><rect width="20" height="6" rx="3" fill="rgba(90,80,235,0.20)"/></svg><span style="color:var(--gray-800); font-size:12px;">Similar properties</span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 2 content: Fine-tune pricing -->
+            <div id="step-2" class="fade-in step-hidden" style="flex:1;">
+              <!-- Property category line -->
+              <div id="step2-category-line" style="display:flex; align-items:center; gap:8px; margin-bottom:16px;">
+                <span style="font-size:16px; color:var(--gray-700); line-height:24px;">Property category:</span>
+                <span id="step2-category-name" style="font-size:16px; font-weight:700; color:var(--black); line-height:24px;">Standard</span>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style="cursor:pointer;" onclick="goBack()"><path d="M14.167 2.5l-1.175 1.175L15.317 6l1.175-1.175a1.664 1.664 0 000-2.35 1.664 1.664 0 00-2.325.025zM13.108 4.558L4.167 13.5v2.333h2.333l8.942-8.942-2.334-2.333z" fill="var(--petrol)"/></svg>
+              </div>
+              <!-- Rate summary -->
+              <div class="rate-summary">
+                <div class="rate-item">
+                  <div class="rate-label">Annual average rate</div>
+                  <div class="rate-value" id="rate-avg-2">130 €</div>
+                </div>
+                <div class="rate-item">
+                  <div class="rate-label">Low season rate</div>
+                  <div class="rate-value" id="rate-low-2">110€</div>
+                </div>
+                <div class="rate-item">
+                  <div class="rate-label">Peak season rate</div>
+                  <div class="rate-value" id="rate-peak-2">260€</div>
+                </div>
+              </div>
+
+              <!-- Chart with 3 lines -->
+              <div class="wizard-chart-container" id="wizard-chart-2">
+                <svg id="chart-svg-2" class="chart-svg" viewBox="0 0 1050 226" preserveAspectRatio="xMidYMid meet" style="width:100%;height:200px;">
+                  <!-- Y axis -->
+                  <text x="8" y="130" fill="var(--gray-700)" font-size="10" transform="rotate(-90, 8, 130)" text-anchor="middle" font-family="Inter,sans-serif">Nightly rate (€)</text>
+                  <text x="28" y="22" fill="var(--black)" font-size="11" font-family="Inter,sans-serif">320€</text>
+                  <text x="28" y="115" fill="var(--black)" font-size="11" font-family="Inter,sans-serif">200€</text>
+                  <text x="28" y="210" fill="var(--black)" font-size="11" font-family="Inter,sans-serif">0€</text>
+                  <!-- Grid lines -->
+                  <line x1="48" y1="15" x2="1040" y2="15" stroke="var(--black-16)"/>
+                  <line x1="48" y1="110" x2="1040" y2="110" stroke="var(--black-16)"/>
+                  <line x1="48" y1="205" x2="1040" y2="205" stroke="var(--black-40)"/>
+                  <!-- Similar properties area -->
+                  <path id="chart2-area" fill="rgba(90,80,235,0.10)" />
+                  <!-- Current prices line (gray dashed) -->
+                  <path id="chart2-current" fill="none" stroke="var(--gray-600)" stroke-width="2" stroke-dasharray="6,4" />
+                  <!-- New prices line (solid purple) -->
+                  <path id="chart2-new" fill="none" stroke="#5A50EB" stroke-width="2.5" />
+                  <!-- X axis labels -->
+                  <text x="60" y="224" fill="var(--gray-700)" font-size="12" font-weight="600" font-family="Inter,sans-serif">Jan '26</text>
+                  <text x="134" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Feb</text>
+                  <text x="208" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Mar</text>
+                  <text x="282" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Apr</text>
+                  <text x="356" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">May</text>
+                  <text x="430" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">June</text>
+                  <text x="504" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">July</text>
+                  <text x="578" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Aug</text>
+                  <text x="652" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Sept</text>
+                  <text x="726" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Oct</text>
+                  <text x="800" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Nov</text>
+                  <text x="874" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Dec</text>
+                  <text x="940" y="224" fill="var(--gray-700)" font-size="12" font-weight="600" font-family="Inter,sans-serif">Jan' 27</text>
+                </svg>
+                <div class="wizard-chart-legend" style="justify-content:center; gap:24px;">
+                  <div class="legend-item">
+                    <svg width="20" height="3" style="flex-shrink:0;"><line x1="0" y1="1.5" x2="20" y2="1.5" stroke="var(--gray-600)" stroke-width="2" stroke-dasharray="4,3"/></svg>
+                    <span style="color:var(--gray-800); font-size:12px;">Your current prices</span>
+                  </div>
+                  <div class="legend-item">
+                    <svg width="20" height="3" style="flex-shrink:0;"><line x1="0" y1="1.5" x2="20" y2="1.5" stroke="#5A50EB" stroke-width="2.5"/></svg>
+                    <span style="color:var(--gray-800); font-size:12px;">Recommended season split</span>
+                  </div>
+                  <div class="legend-item">
+                    <svg width="20" height="6" style="flex-shrink:0;"><rect width="20" height="6" rx="3" fill="rgba(90,80,235,0.20)"/></svg>
+                    <span id="legend-label-2" style="color:var(--gray-800); font-size:12px;">Similar properties</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="sliders-row" style="margin-top:24px;">
+                <div class="slider-card">
+                  <div class="slider-card-title">Price level</div>
+                  <div class="slider-card-desc">Position your prices within the range of similar standard properties.</div>
+                  <div class="slider-wrapper">
+                    <div class="slider-rail"></div>
+                    <div class="slider-track" id="price-track"></div>
+                    <div class="slider-marks"><span class="slider-mark"></span><span class="slider-mark"></span><span class="slider-mark"></span><span class="slider-mark"></span><span class="slider-mark"></span><span class="slider-mark"></span><span class="slider-mark"></span></div>
+                    <input type="range" class="slider-input" id="price-slider" min="0" max="100" value="70" oninput="onSliderChange()">
+                  </div>
+                  <div class="slider-labels">
+                    <span class="slider-label-text">Lower than market</span>
+                    <span class="slider-label-text">Higher than market</span>
+                  </div>
+                </div>
+                <div class="slider-card">
+                  <div class="slider-card-title">Seasonal variation</div>
+                  <div class="slider-card-desc">Control how much your prices change between low and high season.</div>
+                  <div class="slider-wrapper">
+                    <div class="slider-rail"></div>
+                    <div class="slider-track" id="season-track"></div>
+                    <div class="slider-marks"><span class="slider-mark"></span><span class="slider-mark"></span><span class="slider-mark"></span><span class="slider-mark"></span><span class="slider-mark"></span><span class="slider-mark"></span><span class="slider-mark"></span></div>
+                    <input type="range" class="slider-input" id="season-slider" min="0" max="100" value="55" oninput="onSliderChange()">
+                  </div>
+                  <div class="slider-labels">
+                    <span class="slider-label-text">Flatter price</span>
+                    <span class="slider-label-text">Bigger seasonal difference</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 3 content -->
+            <div id="step-3" class="fade-in step-hidden" style="flex:1;">
+              <!-- Rate summary -->
+              <div class="rate-summary">
+                <div class="rate-item">
+                  <div class="rate-label">Annual average rate</div>
+                  <div class="rate-value" id="rate-avg-3">130 €</div>
+                </div>
+                <div class="rate-item">
+                  <div class="rate-label">Low season rate</div>
+                  <div class="rate-value" id="rate-low-3">110€</div>
+                </div>
+                <div class="rate-item">
+                  <div class="rate-label">Peak season rate</div>
+                  <div class="rate-value" id="rate-peak-3">260€</div>
+                </div>
+              </div>
+
+              <!-- Chart with current + new prices -->
+              <div class="wizard-chart-container" id="wizard-chart-3">
+                <svg id="chart-svg-3" class="chart-svg" viewBox="0 0 1050 226" preserveAspectRatio="xMidYMid meet" style="width:100%;height:200px;">
+                  <text x="8" y="130" fill="var(--gray-700)" font-size="10" transform="rotate(-90, 8, 130)" text-anchor="middle" font-family="Inter,sans-serif">Nightly rate (€)</text>
+                  <text x="28" y="22" fill="var(--black)" font-size="11" font-family="Inter,sans-serif">320€</text>
+                  <text x="28" y="115" fill="var(--black)" font-size="11" font-family="Inter,sans-serif">200€</text>
+                  <text x="28" y="210" fill="var(--black)" font-size="11" font-family="Inter,sans-serif">0€</text>
+                  <line x1="48" y1="15" x2="1040" y2="15" stroke="var(--black-16)"/>
+                  <line x1="48" y1="110" x2="1040" y2="110" stroke="var(--black-16)"/>
+                  <line x1="48" y1="205" x2="1040" y2="205" stroke="var(--black-40)"/>
+                  <!-- Current prices (gray dashed) -->
+                  <path id="chart3-current" fill="none" stroke="var(--gray-400)" stroke-width="2" stroke-dasharray="6,4" />
+                  <!-- New prices (purple solid stepped) -->
+                  <path id="chart3-new" fill="none" stroke="var(--discovery)" stroke-width="2.5" />
+                  <!-- X axis -->
+                  <text x="60" y="224" fill="var(--gray-700)" font-size="12" font-weight="600" font-family="Inter,sans-serif">Jan '26</text>
+                  <text x="134" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Feb</text>
+                  <text x="208" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Mar</text>
+                  <text x="282" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Apr</text>
+                  <text x="356" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">May</text>
+                  <text x="430" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">June</text>
+                  <text x="504" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">July</text>
+                  <text x="578" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Aug</text>
+                  <text x="652" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Sept</text>
+                  <text x="726" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Oct</text>
+                  <text x="800" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Nov</text>
+                  <text x="874" y="224" fill="var(--gray-700)" font-size="12" font-family="Inter,sans-serif">Dec</text>
+                  <text x="940" y="224" fill="var(--gray-700)" font-size="12" font-weight="600" font-family="Inter,sans-serif">Jan' 27</text>
+                </svg>
+                <div class="wizard-chart-legend" style="justify-content:center; gap:24px;">
+                  <div class="legend-item">
+                    <svg width="20" height="3" style="flex-shrink:0;"><line x1="0" y1="1.5" x2="20" y2="1.5" stroke="var(--gray-400)" stroke-width="2" stroke-dasharray="4,3"/></svg>
+                    <span style="color:var(--gray-800); font-size:12px;">Your current prices</span>
+                  </div>
+                  <div class="legend-item">
+                    <svg width="20" height="3" style="flex-shrink:0;"><line x1="0" y1="1.5" x2="20" y2="1.5" stroke="var(--discovery)" stroke-width="2.5"/></svg>
+                    <span style="color:var(--gray-800); font-size:12px;">Your new prices</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style="margin-top:24px;"></div>
+
+              <table class="seasons-table" id="step3-table">
+                <thead>
+                  <tr>
+                    <th>Season dates</th>
+                    <th>Nightly rate</th>
+                    <th>Weekend nightly rate</th>
+                    <th>Minimum stay</th>
+                    <th>Check-in</th>
+                    <th>Check-out</th>
+                  </tr>
+                </thead>
+                <tbody id="step3-tbody"></tbody>
+              </table>
+            </div>
+
+            </div><!-- end wizard-scroll-content -->
+
+            <!-- Bottom bar -->
+            <!-- Step 1 footer (simple: Cancel + Apply category) -->
+            <div class="bottom-bar" id="wizard-bottom-bar-step1" style="justify-content:flex-end; gap:16px;">
+              <button class="btn-cancel" onclick="showOverview()">Cancel</button>
+              <button class="btn-next" id="btn-next-step1" onclick="goNext()" disabled>Apply category</button>
+            </div>
+            <!-- Steps 2 & 3 footer (new design: Not now | progress | Next) -->
+            <div class="bottom-bar" id="wizard-bottom-bar-steps" style="display:none; box-shadow:0 -6px 16px rgba(0,0,0,0.08); border-top:none;">
+              <button class="btn-cancel" id="btn-cancel-steps" onclick="showOverview()" style="border:1px solid var(--gray-300); border-radius:8px; padding:12px 24px; font-size:16px; font-weight:600; color:var(--black); background:var(--white); cursor:pointer;">Not now</button>
+              <div style="display:flex; flex:1; max-width:620px; gap:0; align-items:flex-start;">
+                <div style="flex:1; display:flex; flex-direction:column; gap:8px; align-items:center;">
+                  <div id="progress-bar-finetune" style="width:100%; height:4px; background:var(--black); border-radius:0;"></div>
+                  <span id="progress-label-finetune" style="font-size:14px; color:var(--black); line-height:20px; letter-spacing:-0.084px;">Fine-tune</span>
+                </div>
+                <div style="flex:1; display:flex; flex-direction:column; gap:8px; align-items:center;">
+                  <div id="progress-bar-review" style="width:100%; height:4px; background:var(--gray-300); border-radius:0;"></div>
+                  <span id="progress-label-review" style="font-size:14px; color:var(--gray-500); line-height:20px; letter-spacing:-0.084px;">Review seasons</span>
+                </div>
+              </div>
+              <button class="btn-next" id="btn-next-steps" onclick="goNext()" style="background:var(--petrol); color:var(--white); border:none; padding:12px 24px; border-radius:8px; font-size:16px; font-weight:600; cursor:pointer;">Next</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const PRICING_DATA = {
+  'Budget-friendly': { avg: '95 €', low: '60€ - 80€', peak: '150€ - 200€', min: '60€', max: '200€' },
+  'Standard': { avg: '130 €', low: '90€ - 115€', peak: '220€ - 280€', min: '90€', max: '280€' },
+  'Premium': { avg: '195 €', low: '140€ - 175€', peak: '320€ - 420€', min: '140€', max: '420€' }
+};
+
+const X = [48, 90, 130, 170, 210, 250, 290, 340, 390, 418, 450, 492, 520, 540, 566, 590, 620, 650, 680, 714, 750, 788, 830, 862, 900, 936];
+
+const CHART_SHAPES = {
+  'Budget-friendly': {
+    upper: [169, 169, 165, 160, 153, 145, 133, 115, 101, 94, 86, 80, 74, 70, 90, 103, 126, 143, 152, 159, 162, 160, 156, 162, 169, 172],
+    lower: [194, 194, 193, 191, 187, 182, 175, 165, 157, 153, 147, 145, 141, 140, 148, 159, 172, 182, 186, 189, 191, 190, 189, 191, 194, 196]
+  },
+  'Standard': {
+    upper: [143, 140, 133, 123, 111, 96, 78, 52, 30, 18, 8, 2, 0, 2, 55, 72, 93, 115, 127, 136, 140, 136, 129, 139, 148, 152],
+    lower: [179, 177, 176, 173, 167, 159, 150, 134, 118, 112, 105, 98, 96, 98, 125, 136, 150, 165, 171, 174, 176, 175, 173, 177, 180, 181]
+  },
+  'Premium': {
+    upper: [117, 114, 107, 94, 78, 58, 35, 8, 0, 0, 0, 0, 0, 0, 22, 38, 58, 80, 95, 108, 117, 113, 105, 113, 122, 126],
+    lower: [165, 163, 160, 156, 145, 136, 122, 102, 85, 75, 70, 68, 68, 72, 108, 119, 134, 150, 157, 162, 163, 162, 158, 162, 165, 167]
+  }
+};
+
+let currentUpper = [];
+let currentLower = [];
+let animationFrame = null;
+
+const buildAreaPath = (upper, lower) => {
+  let d = 'M' + X[0] + ',' + upper[0];
+  for (let i = 1; i < X.length; i++) d += ' L' + X[i] + ',' + upper[i];
+  for (let i = X.length - 1; i >= 0; i--) d += ' L' + X[i] + ',' + lower[i];
+  d += ' Z';
+  return d;
+};
+
+const buildStrokePath = (pts) => {
+  let d = 'M' + X[0] + ',' + pts[0];
+  for (let i = 1; i < X.length; i++) d += ' L' + X[i] + ',' + pts[i];
+  return d;
+};
+
+const midPoints = (a, b) => a.map((v, i) => (v + b[i]) / 2);
+
+const setChart = (level) => {
+  const shape = CHART_SHAPES[level];
+  const areaEl = document.getElementById('chart-area');
+  const strokeEl = document.getElementById('chart-stroke');
+  if (!areaEl || !strokeEl) return;
+
+  const targetUpper = shape.upper;
+  const targetLower = shape.lower;
+
+  if (currentUpper.length === 0) {
+    currentUpper = [...targetUpper];
+    currentLower = [...targetLower];
+    areaEl.setAttribute('d', buildAreaPath(currentUpper, currentLower));
+    strokeEl.setAttribute('d', '');
+    return;
+  }
+
+  if (animationFrame) cancelAnimationFrame(animationFrame);
+
+  const startUpper = [...currentUpper];
+  const startLower = [...currentLower];
+  const duration = 400;
+  const startTime = performance.now();
+
+  const animate = (now) => {
+    const t = Math.min((now - startTime) / duration, 1);
+    const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+
+    for (let i = 0; i < X.length; i++) {
+      currentUpper[i] = startUpper[i] + (targetUpper[i] - startUpper[i]) * ease;
+      currentLower[i] = startLower[i] + (targetLower[i] - startLower[i]) * ease;
+    }
+
+    areaEl.setAttribute('d', buildAreaPath(currentUpper, currentLower));
+    strokeEl.setAttribute('d', '');
+
+    if (t < 1) animationFrame = requestAnimationFrame(animate);
+  };
+
+  animationFrame = requestAnimationFrame(animate);
+};
+
+let currentStep = 1;
+let selectedLevel = 'Standard';
+
+let CURRENT_PRICES = [160, 160, 158, 155, 152, 148, 142, 130, 120, 115, 108, 105, 100, 98, 120, 135, 148, 158, 162, 165, 168, 166, 162, 165, 168, 170];
+
+const CURRENT_PRICE_SEASONS = [
+  { start: 0, end: 13, y: 155 },
+  { start: 14, end: 25, y: 135 }
+];
+
+const buildCurrentPricePath = () => {
+  const pts = [];
+  CURRENT_PRICE_SEASONS.forEach((s, si) => {
+    const x1 = X[s.start];
+    const x2 = X[s.end];
+    if (si === 0) {
+      pts.push('M' + x1 + ',' + s.y);
+    } else {
+      const prevX = X[CURRENT_PRICE_SEASONS[si - 1].end];
+      pts.push('L' + prevX + ',' + s.y);
+    }
+    pts.push('L' + x2 + ',' + s.y);
+  });
+  return pts.join(' ');
+};
+
+let BASE_SHAPE = [];
+let lastSeasonAvgs = [];
+
+const SEASON_RANGES = [
+  { start: 0, end: 2, label: 'Jan-Mar' },
+  { start: 3, end: 5, label: 'Apr-May' },
+  { start: 6, end: 8, label: 'Jun-Jul' },
+  { start: 9, end: 10, label: 'Aug' },
+  { start: 11, end: 13, label: 'Sep' },
+  { start: 14, end: 16, label: 'Oct-Nov' },
+  { start: 17, end: 19, label: 'Nov-Dec' },
+  { start: 20, end: 22, label: 'Dec-Jan' },
+  { start: 23, end: 25, label: 'Jan-Feb' }
+];
+
+const SEASON_TABLE_DATA = [
+  { dates: 'Thu, Jan 1 - Tue, Mar 31, 2026', season: 'Low', baseNightly: 120, baseWeekend: 140, minStay: '1 night', checkin: 'All week', checkout: 'All week' },
+  { dates: 'Wed, Apr 1 - Sat, May 31, 2026', season: 'Mid', baseNightly: 155, baseWeekend: 175, minStay: '3 nights', checkin: 'All week', checkout: 'All week' },
+  { dates: 'Mon, Jun 1 - Thu, Jul 31, 2026', season: 'High', baseNightly: 210, baseWeekend: 230, minStay: '4 nights', checkin: 'All week', checkout: 'All week' },
+  { dates: 'Fri, Aug 1 - Sun, Aug 31, 2026', season: 'Peak', baseNightly: 250, baseWeekend: 270, minStay: '5 nights', checkin: 'All week', checkout: 'All week' },
+  { dates: 'Mon, Sep 1 - Fri, Sep 30, 2026', season: 'High', baseNightly: 195, baseWeekend: 215, minStay: '4 nights', checkin: 'All week', checkout: 'All week' },
+  { dates: 'Wed, Oct 1 - Sun, Nov 15, 2026', season: 'Mid', baseNightly: 160, baseWeekend: 180, minStay: '3 nights', checkin: 'All week', checkout: 'All week' },
+  { dates: 'Mon, Nov 16 - Thu, Dec 18, 2026', season: 'Low', baseNightly: 135, baseWeekend: 155, minStay: '1 night', checkin: 'All week', checkout: 'All week' },
+  { dates: 'Fri, Dec 19 - Sun, Jan 4, 2027', season: 'Peak', baseNightly: 260, baseWeekend: 280, minStay: '5 nights', checkin: 'All week', checkout: 'All week' },
+  { dates: 'Mon, Jan 5 - Thu, Feb 28, 2027', season: 'Low', baseNightly: 115, baseWeekend: 135, minStay: '1 night', checkin: 'All week', checkout: 'All week' }
+];
+
+const buildSteppedPath = (seasonAvgs) => {
+  const pts = [];
+  SEASON_RANGES.forEach((s, si) => {
+    const y = seasonAvgs[si];
+    const x1 = X[s.start];
+    const x2 = X[s.end];
+    if (si === 0) {
+      pts.push('M' + x1 + ',' + y);
+    } else {
+      const prevX = X[SEASON_RANGES[si - 1].end];
+      pts.push('L' + prevX + ',' + y);
+    }
+    pts.push('L' + x2 + ',' + y);
+  });
+  return pts.join(' ');
+};
+
+const backArrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>';
+
+const showStep = (step) => {
+  currentStep = step;
+  document.getElementById('step-1').classList.toggle('step-hidden', step !== 1);
+  document.getElementById('step-1b').classList.add('step-hidden');
+  document.getElementById('step-2').classList.toggle('step-hidden', step !== 2);
+  document.getElementById('step-3').classList.toggle('step-hidden', step !== 3);
+
+  const footer1 = document.getElementById('wizard-bottom-bar-step1');
+  const footerSteps = document.getElementById('wizard-bottom-bar-steps');
+  const nextBtn1 = document.getElementById('btn-next-step1');
+  const nextBtnSteps = document.getElementById('btn-next-steps');
+
+  if (step === 1) {
+    footer1.style.display = 'flex';
+    footerSteps.style.display = 'none';
+    nextBtn1.disabled = !selectedLevel;
+    document.querySelector('.wizard-title').textContent = 'Where does your property fit in the market?';
+    document.querySelector('.wizard-desc').textContent = 'Choose the category that matches your home. We will show typical nightly price ranges from similar properties across seasons.';
+    document.querySelector('.wizard-desc').style.display = '';
+  } else if (step === 2) {
+    footer1.style.display = 'none';
+    footerSteps.style.display = 'flex';
+    nextBtnSteps.textContent = 'Next';
+    document.getElementById('btn-cancel-steps').textContent = 'Not now';
+    document.getElementById('btn-cancel-steps').setAttribute('onclick', 'showOverview()');
+    document.getElementById('progress-bar-finetune').style.background = 'var(--black)';
+    document.getElementById('progress-label-finetune').style.color = 'var(--black)';
+    document.getElementById('progress-label-finetune').style.fontWeight = '600';
+    document.getElementById('progress-bar-review').style.background = 'var(--gray-300)';
+    document.getElementById('progress-label-review').style.color = 'var(--gray-500)';
+    document.getElementById('progress-label-review').style.fontWeight = '400';
+    document.querySelector('.wizard-title').textContent = 'Adjust your recommended seasonal prices';
+    document.querySelector('.wizard-desc').textContent = 'We suggest a seasonal price for your property based on similar properties in the ' + (selectedLevel || 'Standard') + ' category. Adjust it using the sliders if needed.';
+    document.querySelector('.wizard-desc').style.display = '';
+    document.getElementById('step2-category-name').textContent = selectedLevel || 'Standard';
+    initStep2Chart();
+    document.getElementById('price-slider').value = 50;
+    document.getElementById('season-slider').value = 50;
+    onSliderChange();
+  } else if (step === 3) {
+    footer1.style.display = 'none';
+    footerSteps.style.display = 'flex';
+    nextBtnSteps.textContent = 'Apply new prices';
+    document.getElementById('btn-cancel-steps').textContent = 'Back';
+    document.getElementById('btn-cancel-steps').setAttribute('onclick', 'goBack()');
+    document.getElementById('progress-bar-finetune').style.background = 'var(--gray-300)';
+    document.getElementById('progress-label-finetune').style.color = 'var(--gray-500)';
+    document.getElementById('progress-label-finetune').style.fontWeight = '400';
+    document.getElementById('progress-bar-review').style.background = 'var(--black)';
+    document.getElementById('progress-label-review').style.color = 'var(--black)';
+    document.getElementById('progress-label-review').style.fontWeight = '600';
+    document.querySelector('.wizard-title').textContent = 'Review your seasonal prices';
+    document.querySelector('.wizard-desc').textContent = 'When published, these seasonal prices will replace all current prices for the entire year.';
+    document.querySelector('.wizard-desc').style.display = '';
+    initStep3();
+  }
+};
+
+const goNext = () => {
+  if (currentStep === 1 && !selectedLevel) return;
+  if (currentStep === 1) { categoryApplied = true; lastSelectedLevel = selectedLevel; showStep(2); }
+  else if (currentStep === 2) showStep(3);
+  else if (currentStep === 3) {
+    publishPrices();
+  }
+};
+
+const publishPrices = () => {
+  const yToPrice = (y) => Math.round(320 - y * (320 / 205));
+  const prices = lastSeasonAvgs.map(yToPrice);
+  const pencilSvg = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>';
+
+  const tbody = document.getElementById('overview-tbody');
+  tbody.innerHTML = '';
+  SEASON_TABLE_DATA.forEach((row, i) => {
+    const priceMult = prices[i] ? prices[i] / row.baseNightly : 1;
+    const nightly = prices[i] || row.baseNightly;
+    const weekend = Math.round(row.baseWeekend * priceMult);
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td>' + row.dates + '</td><td>' + nightly + '€</td><td>' + weekend + '€</td><td>' + row.minStay + '</td><td>' + row.checkin + '</td><td>' + row.checkout + '</td><td class="edit-icon-cell">' + pencilSvg + '</td><td class="peers-avg">' + row.baseNightly + '€</td>';
+    tbody.appendChild(tr);
+  });
+
+  CURRENT_PRICES.length = 0;
+  const X_U = [];
+  for (let i = 0; i < 26; i++) X_U.push(48 + i * (912 / 25));
+  SEASON_RANGES.forEach((s, si) => {
+    const y = lastSeasonAvgs[si];
+    for (let i = s.start; i <= s.end; i++) CURRENT_PRICES[i] = y;
+  });
+
+  CURRENT_PRICE_SEASONS.length = 0;
+  SEASON_RANGES.forEach((s, si) => {
+    CURRENT_PRICE_SEASONS.push({ start: s.start, end: s.end, y: lastSeasonAvgs[si] });
+  });
+
+  categoryApplied = true;
+  pricesPublished = true;
+  showOverview();
+};
+
+const goBack = () => {
+  if (currentStep === 2) showStep(1);
+  else if (currentStep === 3) showStep(2);
+};
+
+const showWizard = () => {
+  document.getElementById('overview-page').classList.add('hidden');
+  document.getElementById('wizard-page').classList.add('active');
+  document.getElementById('wizard-page').classList.add('fade-in');
+  document.querySelector('.pricing-section').classList.add('wizard-active');
+
+  if (categoryApplied && lastSelectedLevel) {
+    selectedLevel = lastSelectedLevel;
+    document.querySelectorAll('.level-card').forEach(c => {
+      c.classList.toggle('selected', c.querySelector('.level-name').textContent === selectedLevel);
+    });
+    setChart(selectedLevel);
+    showStep(2);
+  } else {
+    selectedLevel = null;
+    document.querySelectorAll('.level-card').forEach(c => c.classList.remove('selected'));
+    document.getElementById('rate-avg').textContent = '€';
+    document.getElementById('rate-low').textContent = '€';
+    document.getElementById('rate-peak').textContent = '€';
+    document.getElementById('legend-label').textContent = 'Similar properties';
+    document.getElementById('chart-area').setAttribute('d', '');
+    document.getElementById('chart-stroke').setAttribute('d', '');
+    currentUpper = [];
+    currentLower = [];
+    showStep(1);
+  }
+};
+
+let categoryApplied = false;
+let pricesPublished = false;
+let lastSelectedLevel = null;
+
+const showOverview = () => {
+  document.getElementById('overview-page').classList.remove('hidden');
+  document.getElementById('wizard-page').classList.remove('active');
+  document.querySelector('.pricing-section').classList.remove('wizard-active');
+
+  document.getElementById('finetune-banner').style.display = (categoryApplied && !pricesPublished) ? 'flex' : 'none';
+
+  if (categoryApplied) {
+    document.querySelector('.chart-empty-state').style.display = 'none';
+    document.getElementById('unlocked-chart').style.display = '';
+    try { initUnlockedChart(); } catch(e) { console.error('initUnlockedChart error:', e); }
+  }
+
+  currentStep = 1;
+};
+
+const toggleChartLayer = (layer) => {
+  const toggle = document.getElementById('toggle-' + (layer === 'demand' ? 'demand' : 'similar'));
+  toggle.classList.toggle('active');
+  const isActive = toggle.classList.contains('active');
+
+  if (layer === 'demand') {
+    document.getElementById('unlocked-demand').style.display = isActive ? '' : 'none';
+  } else {
+    document.getElementById('unlocked-similar').style.display = isActive ? '' : 'none';
+  }
+};
+
+const initUnlockedChart = () => {
+  const shape = CHART_SHAPES[lastSelectedLevel || selectedLevel || 'Standard'];
+  const X_U = [];
+  for (let i = 0; i < 26; i++) X_U.push(48 + i * (912 / 25));
+
+  const scaleY = (v) => 45 + (205 - 45) * (1 - v / 205);
+
+  const similarUpper = shape.upper.map((v, i) => X_U[i] + ',' + v);
+  const similarLower = [...shape.lower].reverse().map((v, i) => X_U[25 - i] + ',' + v);
+  document.getElementById('unlocked-similar').setAttribute('d', 'M' + similarUpper.join(' L') + ' L' + similarLower.join(' L') + ' Z');
+
+  const demandCurve = [195,192,188,180,170,155,130,105,80,65,55,50,55,70,90,120,148,165,175,180,178,168,155,140,130,125];
+  const demandPath = demandCurve.map((v, i) => X_U[i] + ',' + v);
+  const demandBase = demandCurve.map((v, i) => X_U[25 - i] + ',205');
+  document.getElementById('unlocked-demand').setAttribute('d', 'M' + demandPath.join(' L') + ' L' + demandBase.reverse().join(' L') + ' Z');
+
+  document.getElementById('unlocked-prices').setAttribute('d', buildCurrentPricePath());
+
+  const mid = shape.upper.map((u, i) => Math.round((u + shape.lower[i]) / 2));
+  const recAvgs = SEASON_RANGES.map(s => {
+    let sum = 0;
+    for (let i = s.start; i <= s.end; i++) sum += mid[i];
+    return sum / (s.end - s.start + 1);
+  });
+  const recEl = document.getElementById('unlocked-recommended');
+  recEl.setAttribute('d', buildSteppedPath(recAvgs));
+  recEl.style.display = '';
+  document.getElementById('legend-recommended').style.display = '';
+  if (pricesPublished) {
+    document.getElementById('unlocked-noprice1').style.display = 'none';
+    document.getElementById('unlocked-noprice2').style.display = 'none';
+    document.getElementById('legend-noprices').style.display = 'none';
+  }
+
+  const np1 = document.getElementById('unlocked-noprice1');
+  np1.setAttribute('x', X_U[11]);
+  np1.setAttribute('y', '45');
+  np1.setAttribute('width', X_U[14] - X_U[11]);
+  np1.setAttribute('height', '160');
+
+  const np2 = document.getElementById('unlocked-noprice2');
+  np2.setAttribute('x', X_U[24]);
+  np2.setAttribute('y', '45');
+  np2.setAttribute('width', X_U[25] - X_U[24] + 12);
+  np2.setAttribute('height', '160');
+};
+
+const selectLevel = (card) => {
+  document.querySelectorAll('.level-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+
+  const title = card.querySelector('.level-card-title').textContent;
+  selectedLevel = title;
+  const data = PRICING_DATA[title];
+  if (data) {
+    document.getElementById('rate-avg').textContent = data.avg;
+    document.getElementById('rate-low').textContent = data.low;
+    document.getElementById('rate-peak').textContent = data.peak;
+    document.getElementById('legend-label').textContent = 'Similar ' + title + ' properties (' + data.min + ' - ' + data.max + ')';
+    setChart(title);
+    const nextBtn = document.getElementById('btn-next-step1');
+    nextBtn.disabled = false;
+  }
+};
+
+const initStep1b = () => {
+  const shape = CHART_SHAPES[selectedLevel];
+  if (!shape) return;
+  document.getElementById('chart1b-area').setAttribute('d', buildAreaPath(shape.upper, shape.lower));
+  document.getElementById('chart1b-current').setAttribute('d', buildCurrentPricePath());
+  const mid = shape.upper.map((u, i) => Math.round((u + shape.lower[i]) / 2));
+  const recAvgs = SEASON_RANGES.map(s => {
+    let sum = 0;
+    for (let i = s.start; i <= s.end; i++) sum += mid[i];
+    return sum / (s.end - s.start + 1);
+  });
+  document.getElementById('chart1b-recommended').setAttribute('d', buildSteppedPath(recAvgs));
+  document.getElementById('compare-sub').textContent = 'Based on similar properties in the ' + selectedLevel + ' category.';
+  const yToPrice = (y) => Math.round(320 - y * (320 / 205));
+  const prices = recAvgs.map(yToPrice);
+  const avgP = Math.round(prices.reduce((s, v) => s + v, 0) / prices.length);
+  document.getElementById('rate-avg-1b').textContent = avgP + '€';
+  document.getElementById('rate-low-1b').textContent = Math.min(...prices) + '€';
+  document.getElementById('rate-peak-1b').textContent = Math.max(...prices) + '€';
+};
+
+const initStep2Chart = () => {
+  const shape = CHART_SHAPES[selectedLevel];
+  const areaEl = document.getElementById('chart2-area');
+  const currentEl = document.getElementById('chart2-current');
+  if (!areaEl || !currentEl) return;
+  areaEl.setAttribute('d', buildAreaPath(shape.upper, shape.lower));
+  currentEl.setAttribute('d', buildCurrentPricePath());
+  BASE_SHAPE = shape.upper.map((u, i) => Math.round((u + shape.lower[i]) / 2));
+  document.getElementById('legend-label-2').textContent = 'Similar properties (' + selectedLevel + ')';
+};
+
+const initStep3 = () => {
+  const currentEl = document.getElementById('chart3-current');
+  const newEl = document.getElementById('chart3-new');
+  if (!currentEl || !newEl) return;
+
+  currentEl.setAttribute('d', buildCurrentPricePath());
+
+  if (lastSeasonAvgs.length > 0) {
+    newEl.setAttribute('d', buildSteppedPath(lastSeasonAvgs));
+  } else {
+    const shape = CHART_SHAPES[selectedLevel];
+    const mid = shape.upper.map((u, i) => Math.round((u + shape.lower[i]) / 2));
+    const avgs = SEASON_RANGES.map(s => {
+      let sum = 0;
+      for (let i = s.start; i <= s.end; i++) sum += mid[i];
+      return sum / (s.end - s.start + 1);
+    });
+    newEl.setAttribute('d', buildSteppedPath(avgs));
+    lastSeasonAvgs = avgs;
+  }
+
+  const yToPrice = (y) => Math.round(320 - y * (320 / 205));
+  const prices = lastSeasonAvgs.map(yToPrice);
+  const avgP = Math.round(prices.reduce((s, v) => s + v, 0) / prices.length);
+  const peakP = Math.max(...prices);
+  const lowP = Math.min(...prices);
+
+  document.getElementById('rate-avg-3').textContent = avgP + ' €';
+  document.getElementById('rate-low-3').textContent = lowP + '€';
+  document.getElementById('rate-peak-3').textContent = peakP + '€';
+
+  const tbody = document.getElementById('step3-tbody');
+  tbody.innerHTML = '';
+  SEASON_TABLE_DATA.forEach((row, i) => {
+    const priceMult = prices[i] ? prices[i] / row.baseNightly : 1;
+    const nightly = prices[i] || row.baseNightly;
+    const weekend = Math.round(row.baseWeekend * priceMult);
+    const tr = document.createElement('tr');
+    tr.style.background = 'rgba(90,80,235,0.04)';
+    tr.innerHTML = '<td>' + row.dates + '</td><td>' + nightly + '€</td><td>' + weekend + '€</td><td>' + row.minStay + '</td><td>' + row.checkin + '</td><td>' + row.checkout + '</td>';
+    tbody.appendChild(tr);
+  });
+};
+
+const onSliderChange = () => {
+  const priceVal = parseInt(document.getElementById('price-slider').value);
+  const seasonVal = parseInt(document.getElementById('season-slider').value);
+
+  document.getElementById('price-track').style.width = priceVal + '%';
+  document.getElementById('season-track').style.width = seasonVal + '%';
+
+  const priceOffset = (priceVal - 50) * 0.8;
+  const seasonMult = 0.3 + (seasonVal / 100) * 1.4;
+
+  const seasonAvgs = SEASON_RANGES.map(s => {
+    let sum = 0;
+    for (let i = s.start; i <= s.end; i++) sum += BASE_SHAPE[i];
+    return sum / (s.end - s.start + 1);
+  });
+
+  const globalAvg = seasonAvgs.reduce((s, v) => s + v, 0) / seasonAvgs.length;
+
+  const adjusted = seasonAvgs.map(v => {
+    const diff = v - globalAvg;
+    return Math.round(globalAvg - priceOffset + diff * seasonMult);
+  });
+
+  lastSeasonAvgs = adjusted;
+
+  const newEl = document.getElementById('chart2-new');
+  if (newEl) newEl.setAttribute('d', buildSteppedPath(adjusted));
+
+  const yToPrice = (y) => Math.round(320 - y * (320 / 205));
+  const prices = adjusted.map(yToPrice);
+  const avgPrice = Math.round(prices.reduce((s, v) => s + v, 0) / prices.length);
+  const peakPrice = Math.max(...prices);
+  const lowPrice = Math.min(...prices);
+
+  document.getElementById('rate-avg-2').textContent = avgPrice + ' €';
+  document.getElementById('rate-low-2').textContent = lowPrice + '€';
+  document.getElementById('rate-peak-2').textContent = peakPrice + '€';
+};
+
+document.querySelectorAll('.toggle-switch').forEach(el => {
+  el.addEventListener('click', () => el.classList.toggle('off'));
+});
+
+document.getElementById('price-track').style.width = '50%';
+document.getElementById('season-track').style.width = '50%';
+</script>
+
+</body>
+</html>
