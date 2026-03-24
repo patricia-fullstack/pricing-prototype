@@ -249,43 +249,6 @@ P<!DOCTYPE html>
   .fade-in { animation: fadeIn 0.3s ease-in; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-  /* Mobile responsive */
-  @media (max-width: 768px) {
-    .app { flex-direction: column; }
-    .sidebar { display: none; }
-    .main { margin-left: 0; }
-    .content { padding: 12px; }
-    .config-layout { flex-direction: column; gap: 0; padding: 0; }
-    .config-tabs { display: none; }
-    .pricing-section { max-width: 100%; }
-    .pricing-section.wizard-active { height: calc(100vh - 64px - 24px); }
-    .navbar { padding: 0 12px; }
-    .rate-summary { flex-wrap: wrap; gap: 12px; }
-    .rate-item { min-width: calc(50% - 12px); }
-    .level-cards { flex-direction: column; }
-    .sliders-row { flex-direction: column; gap: 16px; }
-    .seasons-table { font-size: 12px; display: block; overflow-x: auto; white-space: nowrap; }
-    .wizard-chart-container { overflow-x: auto; }
-    .wizard-chart-container svg { min-width: 600px; }
-    .chart-empty-state { min-height: 200px; }
-    .chart-empty-overlay { padding: 16px; }
-    .empty-state-title { font-size: 16px; }
-    .empty-state-desc { font-size: 14px; }
-    .btn-choose { font-size: 14px; padding: 8px 16px; }
-    .bottom-bar { padding: 10px 12px; flex-wrap: wrap; gap: 8px; }
-    #wizard-bottom-bar-steps { flex-wrap: wrap; gap: 12px; justify-content: center; }
-    #wizard-bottom-bar-steps > div { order: -1; width: 100%; max-width: 100%; }
-    #wizard-bottom-bar-steps > button { flex: 1; min-width: 0; }
-    #finetune-banner { flex-direction: column; gap: 12px; }
-    #finetune-banner button { white-space: normal; margin-left: 0 !important; width: 100%; }
-    #unlocked-chart { overflow-x: auto; }
-    #unlocked-chart svg { min-width: 600px; }
-    .chart-toggle { padding: 2px 8px 2px 2px; }
-    .toggle-label { font-size: 11px; }
-    .wizard-title { font-size: 18px; }
-    .wizard-desc { font-size: 13px; }
-    #step2-category-line { flex-wrap: wrap; }
-  }
 </style>
 </head>
 <body>
